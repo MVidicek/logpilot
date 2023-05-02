@@ -1,0 +1,28 @@
+{
+  "name": "logpilot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Self-hosted log aggregation for small teams",
+  "author": "Marko Vidicek <marko.vidicek@outlook.com>",
+  "license": "MIT",
+  "workspaces": [
+    "packages/server",
+    "packages/web",
+    "packages/sdk/node"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "turbo": "^1.10.16",
+    "typescript": "^5.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "npm@9.8.1"
+}
