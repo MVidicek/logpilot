@@ -1,0 +1,36 @@
+{
+  "name": "@logpilot/server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LogPilot backend server",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src/",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@clickhouse/client": "^0.2.6",
+    "@fastify/cookie": "^9.1.0",
+    "@fastify/cors": "^8.4.1",
+    "@fastify/websocket": "^8.2.0",
+    "bcryptjs": "^2.4.3",
+    "fastify": "^4.24.3",
+    "ioredis": "^5.3.2",
+    "pg": "^8.11.3",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20.9.0",
+    "@types/pg": "^8.10.9",
+    "@types/uuid": "^9.0.6",
+    "tsx": "^4.1.1",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.6"
+  }
+}
