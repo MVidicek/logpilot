@@ -1,0 +1,28 @@
+{
+  "name": "@logpilot/node",
+  "version": "1.0.0",
+  "description": "Node.js SDK for LogPilot log aggregation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["logging", "log-aggregation", "observability", "logpilot"],
+  "author": "Marko Vidicek <marko.vidicek@outlook.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MVidicek/logpilot.git",
+    "directory": "packages/sdk/node"
+  },
+  "devDependencies": {
+    "@types/node": "^20.9.0",
+    "typescript": "^5.2.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
