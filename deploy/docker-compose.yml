@@ -1,0 +1,75 @@
+version: "3.8"
+
+services:
+  server:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.server
+    ports:
+      - "3100:3100"
+      - "5514:5514/udp"
+      - "5514:5514/tcp"
+    environment:
+      - PORT=3100
+      - CLICKHOUSE_URL=http://clickhouse:8123
+      - CLICKHOUSE_DB=logpilot
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=logpilot
+      - POSTGRES_USER=logpilot
+      - POSTGRES_PASSWORD=logpilot
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - SESSION_SECRET=change-me-in-production
+    depends_on:
+      - clickhouse
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.web
+    ports:
+      - "5173:80"
+    depends_on:
+      - server
+    restart: unless-stopped
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:23.8
+    ports:
+      - "8123:8123"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=logpilot
+      - POSTGRES_PASSWORD=logpilot
+      - POSTGRES_DB=logpilot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  clickhouse_data:
+  postgres_data:
+  redis_data:
