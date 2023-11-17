@@ -138,23 +138,24 @@ export class LogPilot {
     }
   }
 
-  /** Synchronous flush for process exit — uses sync XHR as last resort */
+  /** Synchronous flush for process exit — uses spawnSync to avoid shell injection */
   private flushSync(): void {
     if (this.buffer.length === 0) return;
 
     const batch = this.buffer.splice(0);
 
     try {
-      // Use a synchronous approach with child_process for exit handlers
-      const { execSync } = require('child_process');
+      const { spawnSync } = require('child_process');
       const url = `${this.endpoint}/api/v1/logs`;
       const body = JSON.stringify(batch);
 
-      // Use curl for synchronous HTTP
-      execSync(
-        `curl -s -X POST "${url}" -H "Content-Type: application/json" -H "X-API-Key: ${this.apiKey}" -d '${body.replace(/'/g, "'\\''")}'`,
-        { timeout: 5000, stdio: 'ignore' }
-      );
+      // Use spawnSync with argv array — no shell interpolation
+      spawnSync('curl', [
+        '-s', '-X', 'POST', url,
+        '-H', 'Content-Type: application/json',
+        '-H', `X-API-Key: ${this.apiKey}`,
+        '-d', body,
+      ], { timeout: 5000, stdio: 'ignore' });
     } catch {
       // Best effort — data may be lost on exit
     }
