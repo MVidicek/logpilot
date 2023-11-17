@@ -19,22 +19,13 @@ TTL toDateTime(timestamp) + INTERVAL {retention_days:UInt32} DAY
 SETTINGS index_granularity = 8192
 `;
 
-const SCHEMA_SQL_DEFAULT = `
-CREATE TABLE IF NOT EXISTS logs (
-  id UUID DEFAULT generateUUIDv4(),
-  timestamp DateTime64(3, 'UTC'),
-  level Enum8('debug' = 1, 'info' = 2, 'warn' = 3, 'error' = 4, 'fatal' = 5),
-  message String,
-  source String,
-  metadata Map(String, String),
-  raw String
-)
-ENGINE = ReplacingMergeTree()
-PARTITION BY toYYYYMM(timestamp)
-ORDER BY (source, level, timestamp, id)
-TTL toDateTime(timestamp) + INTERVAL 30 DAY
-SETTINGS index_granularity = 8192
-`;
+/** Validate a ClickHouse identifier (database/table name) to prevent injection. */
+function validateIdentifier(name: string): string {
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name)) {
+    throw new Error(`Invalid ClickHouse identifier: ${name}`);
+  }
+  return name;
+}
 
 export class ClickHouseStorage {
   private client: ClickHouseClient;
@@ -55,14 +46,18 @@ export class ClickHouseStorage {
   }
 
   async initialize(): Promise<void> {
+    // Validate the database name before using it in a query
+    const safeName = validateIdentifier(this.database);
+
     // Create database if it doesn't exist
     await this.client.exec({
-      query: `CREATE DATABASE IF NOT EXISTS ${this.database}`,
+      query: `CREATE DATABASE IF NOT EXISTS ${safeName}`,
     });
 
-    // Create logs table
+    // Create logs table with configurable retention
     await this.client.exec({
-      query: SCHEMA_SQL_DEFAULT,
+      query: SCHEMA_SQL,
+      query_params: { retention_days: this.config.retention.defaultDays },
     });
   }
 

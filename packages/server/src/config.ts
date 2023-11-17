@@ -64,6 +64,13 @@ function envStr(key: string, fallback: string): string {
 }
 
 export function loadConfig(): Config {
+  const sessionSecret = envStr('SESSION_SECRET', 'change-me-in-production');
+
+  // Prevent running with the default secret in production
+  if (process.env.NODE_ENV === 'production' && sessionSecret === 'change-me-in-production') {
+    throw new Error('SESSION_SECRET must be set in production. Generate one with: openssl rand -hex 32');
+  }
+
   return {
     port: envInt('PORT', 3100),
     host: envStr('HOST', '0.0.0.0'),
@@ -97,7 +104,7 @@ export function loadConfig(): Config {
     },
 
     auth: {
-      sessionSecret: envStr('SESSION_SECRET', 'change-me-in-production'),
+      sessionSecret,
       sessionMaxAge: envInt('SESSION_MAX_AGE', 86400000), // 24 hours
       bcryptRounds: envInt('BCRYPT_ROUNDS', 10),
     },
