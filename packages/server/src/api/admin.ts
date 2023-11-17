@@ -104,6 +104,13 @@ export function registerAdminRoutes(
       },
     },
     handler: async (request: FastifyRequest<RegisterBody>, reply: FastifyReply) => {
+      // Only allow registration if no users exist yet (first-user setup)
+      const userCount = await postgres.getUserCount();
+      if (userCount > 0) {
+        reply.status(403).send({ error: 'Registration is disabled. Contact an admin for access.' });
+        return;
+      }
+
       try {
         const { email, password, name } = request.body;
         const user = await postgres.createUser(email, password, name);

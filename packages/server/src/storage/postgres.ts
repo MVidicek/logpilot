@@ -146,6 +146,11 @@ export class PostgresStorage {
 
   // --- User Management ---
 
+  async getUserCount(): Promise<number> {
+    const result = await this.pool.query('SELECT count(*)::int AS cnt FROM users');
+    return result.rows[0].cnt;
+  }
+
   async createUser(email: string, password: string, name?: string): Promise<{ id: string }> {
     const passwordHash = await bcrypt.hash(password, this.bcryptRounds);
     const result = await this.pool.query(

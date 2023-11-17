@@ -13,6 +13,7 @@ import { registerAlertRoutes } from './api/alerts';
 import { registerDashboardRoutes } from './api/dashboards';
 import { registerAdminRoutes } from './api/admin';
 import { createApiKeyAuth } from './auth/apikey';
+import { createSessionAuth } from './auth/session';
 
 export interface AppContext {
   app: FastifyInstance;
@@ -23,6 +24,13 @@ export interface AppContext {
   alertEngine: AlertEngine;
 }
 
+// Routes that don't require session authentication
+const PUBLIC_ROUTES = new Set([
+  '/health',
+  '/api/v1/auth/login',
+  '/api/v1/auth/register',
+]);
+
 export async function buildApp(config: Config): Promise<AppContext> {
   const app = Fastify({
     logger: {
@@ -32,11 +40,13 @@ export async function buildApp(config: Config): Promise<AppContext> {
 
   // Register plugins
   await app.register(cors, {
-    origin: true,
+    origin: process.env.CORS_ORIGIN || true,
     credentials: true,
   });
 
-  await app.register(cookie);
+  await app.register(cookie, {
+    secret: config.auth.sessionSecret,
+  });
   await app.register(websocket);
 
   // Initialize storage
@@ -62,13 +72,22 @@ export async function buildApp(config: Config): Promise<AppContext> {
     return { status: 'ok', timestamp: new Date().toISOString() };
   });
 
-  // API key auth hook for ingestion endpoint
+  // Auth hooks
   const apiKeyAuth = createApiKeyAuth(postgres);
+  const sessionAuth = createSessionAuth(postgres);
 
   app.addHook('onRequest', async (request, reply) => {
-    // Only require API key for log ingestion
-    if (request.url === '/api/v1/logs' && request.method === 'POST') {
+    const url = request.url.split('?')[0];
+
+    // API key auth for log ingestion
+    if (url === '/api/v1/logs' && request.method === 'POST') {
       await apiKeyAuth(request, reply);
+      return;
+    }
+
+    // Session auth for all other /api routes (except public ones)
+    if (url.startsWith('/api/') && !PUBLIC_ROUTES.has(url)) {
+      await sessionAuth(request, reply);
     }
   });
 
