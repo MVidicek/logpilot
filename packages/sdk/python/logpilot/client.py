@@ -117,7 +117,8 @@ class LogPilot:
             with self._lock:
                 self._buffer = batch + self._buffer
             # Log locally but don't crash
-            print(f"[logpilot] Flush error: {e}")
+            import logging
+            logging.getLogger("logpilot").error("Flush error: %s", e)
 
     def _send_with_retry(self, batch: List[Dict[str, Any]]) -> None:
         last_error: Optional[Exception] = None
@@ -166,6 +167,7 @@ class LogPilot:
         """Flush remaining logs and stop the background thread."""
         self._closed = True
         self._flush_event.set()
+        self._flush_thread.join(timeout=10)
         self.flush()
 
     def __enter__(self) -> "LogPilot":
