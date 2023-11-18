@@ -6,7 +6,6 @@ const props = defineProps<{
   labels: string[];
   data: number[];
   color?: string;
-  type?: 'bar' | 'line';
 }>();
 
 const maxValue = computed(() => Math.max(...props.data, 1));

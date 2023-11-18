@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, watch } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import SearchBar from '../components/SearchBar.vue';
 import TimeRangePicker from '../components/TimeRangePicker.vue';
 import LogTable from '../components/LogTable.vue';
@@ -29,8 +29,7 @@ onMounted(() => {
   doSearch();
 });
 
-const currentPage = $computed(() => Math.floor(filters.offset / filters.limit) + 1);
-const totalPages = $computed(() => Math.ceil(total.value / filters.limit));
+const currentPage = computed(() => Math.floor(filters.offset / filters.limit) + 1);
 </script>
 
 <template>

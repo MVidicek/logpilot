@@ -20,11 +20,16 @@ async function request<T>(
     ...(options.headers as Record<string, string> || {}),
   };
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-    credentials: 'include',
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers,
+      credentials: 'include',
+    });
+  } catch {
+    throw new ApiError(0, 'Network error — check your connection and try again');
+  }
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({ error: response.statusText }));

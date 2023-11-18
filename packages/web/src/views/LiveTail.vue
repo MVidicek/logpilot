@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted } from 'vue';
 import LevelBadge from '../components/LevelBadge.vue';
 import { useLiveTail } from '../composables/useLiveTail';
 import type { LogLevel } from '../types';

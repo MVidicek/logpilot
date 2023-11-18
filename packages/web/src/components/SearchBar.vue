@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import type { LogLevel } from '../types';
 
 const props = defineProps<{
@@ -17,6 +17,10 @@ const emit = defineEmits<{
 }>();
 
 const inputValue = ref(props.modelValue);
+
+watch(() => props.modelValue, (v) => {
+  inputValue.value = v;
+});
 
 const levels: LogLevel[] = ['debug', 'info', 'warn', 'error', 'fatal'];
 
