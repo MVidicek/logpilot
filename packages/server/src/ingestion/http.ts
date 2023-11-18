@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import Redis from 'ioredis';
 import { LogEntry, LogIngestionPayload, LogLevel } from '../types/log';
 import { parse, normalizeLevel } from './parser';
@@ -138,7 +138,7 @@ export class HttpIngestion {
     const parsed = parse(payload.message);
 
     return {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       timestamp: parsed.timestamp || timestamp,
       level: payload.level ? level : parsed.level,
       message: parsed.message || payload.message,

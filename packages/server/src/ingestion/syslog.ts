@@ -1,6 +1,6 @@
 import * as dgram from 'dgram';
 import * as net from 'net';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import { Config } from '../config';
 import { ClickHouseStorage } from '../storage/clickhouse';
 import { parseSyslogRFC5424, parseSyslogBSD, detectFormat } from './parser';
@@ -64,6 +64,12 @@ export class SyslogReceiver {
         let remainder = '';
         const remoteAddr = socket.remoteAddress || 'unknown';
 
+        // Close idle connections after 2 minutes
+        socket.setTimeout(120_000);
+        socket.on('timeout', () => {
+          socket.destroy();
+        });
+
         socket.on('data', (data: Buffer) => {
           remainder += data.toString('utf-8');
           const lines = remainder.split('\n');
@@ -109,7 +115,7 @@ export class SyslogReceiver {
     }
 
     const entry: LogEntry = {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       timestamp: parsed.timestamp || new Date(),
       level: parsed.level,
       message: parsed.message,
