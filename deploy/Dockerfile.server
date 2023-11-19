@@ -2,8 +2,8 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy root config
-COPY package.json turbo.json ./
+# Copy root config and lockfile for reproducible installs
+COPY package.json package-lock.json turbo.json ./
 
 # Copy server package
 COPY packages/server/package.json packages/server/
@@ -11,8 +11,11 @@ COPY packages/server/tsconfig.json packages/server/
 COPY packages/server/src packages/server/src
 
 # Install and build
-RUN npm install --workspace=packages/server
+RUN npm ci --workspace=packages/server
 RUN npm run build --workspace=packages/server
+
+# Prune devDependencies for a leaner production image
+RUN npm prune --omit=dev --workspace=packages/server
 
 FROM node:18-alpine
 
