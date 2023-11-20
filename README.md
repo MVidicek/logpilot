@@ -28,7 +28,7 @@ docker compose up -d
 open http://localhost:5173
 ```
 
-**Create an API key** in Settings, then send your first log:
+**Register your admin account** (first user only), then **create an API key** in Settings and send your first log:
 
 ```bash
 curl -X POST http://localhost:3100/api/v1/logs \
@@ -147,6 +147,7 @@ All configuration is via environment variables:
 | `RETENTION_DAYS`          | `30`              | Days to keep logs in ClickHouse    |
 | `ALERT_CHECK_INTERVAL`    | `60`              | Seconds between alert checks       |
 | `INGESTION_BATCH_SIZE`    | `500`             | Logs per ClickHouse insert batch   |
+| `CORS_ORIGIN`             | `*`               | Allowed CORS origin (set in prod)  |
 
 ## Production Deployment
 
